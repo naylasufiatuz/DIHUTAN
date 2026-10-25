@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Kenali perangkat IoT DiHutan, cara kerja sensor gambut, sistem AI Forest Guardian, dan AutoSpray untuk membantu mencegah karhutla." />
+  <title>Teknologi DiHutan — Dari Sensor Menjadi Aksi</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+    body {
+      margin: 0;
+      color: #173f33;
+      background: #fff;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      line-height: 1.65;
+    }
+    a { color: inherit; }
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+      width: 100%;
+      padding: 10px max(28px, calc((100vw - 1280px) / 2));
+      border-bottom: 1px solid rgba(255,255,255,.14);
+      background: rgba(9,32,23,.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: #fff;
+      font-size: 19px;
+      font-weight: 750;
+      letter-spacing: -.04em;
+      text-decoration: none;
+    }
+    .brand img { width: 34px; height: 34px; object-fit: contain; }
+    .main-nav {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      padding: 4px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 999px;
+      background: rgba(255,255,255,.1);
+      list-style: none;
+    }
+    .main-nav a {
+      display: block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      color: rgba(255,255,255,.78);
+      font-size: 10px;
+      font-weight: 650;
+      letter-spacing: .055em;
+      text-decoration: none;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition: background .2s, color .2s;
+    }
+    .main-nav a:hover, .main-nav a[aria-current="location"] { background: rgba(255,255,255,.18); color: #fff; }
+    .header-link {
+      padding: 9px 16px;
+      border: 1px solid #f7f7ef;
+      border-radius: 999px;
+      background: #f7f7ef;
+      color: #1a3328;
+      font-size: 10px;
+      font-weight: 750;
+      letter-spacing: .055em;
+      text-decoration: none;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition: background .2s, color .2s;
+    }
+    .header-link:hover { border-color: #fff; background: transparent; color: #fff; }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 100px 28px 88px;
+      background: linear-gradient(115deg, #fff 0%, #fff 58%, #fbfaf6 100%);
+    }
+    .hero::before {
+      position: absolute;
+      right: -6%;
+      bottom: -125px;
+      left: -6%;
+      height: 210px;
+      border-radius: 50% 50% 0 0 / 32% 28% 0 0;
+      background: #f8f7ef;
+      content: "";
+      pointer-events: none;
+    }
+    .hero::after {
+      position: absolute;
+      right: -110px;
+      bottom: -310px;
+      width: 560px;
+      height: 560px;
+      border: 1px solid rgba(23,63,51,.07);
+      border-radius: 50%;
+      box-shadow: 0 0 0 50px rgba(23,63,51,.025), 0 0 0 100px rgba(23,63,51,.025);
+      content: "";
+      pointer-events: none;
+    }
+    .hero__inner, .content { width: min(1120px, 100%); margin: 0 auto; }
+    .hero__inner { position: relative; z-index: 1; }
+    .eyebrow {
+      margin: 0 0 14px;
+      color: #438765;
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: .17em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      max-width: 760px;
+      margin-bottom: 20px;
+      font-size: clamp(42px, 7vw, 76px);
+      letter-spacing: -.055em;
+      line-height: .99;
+    }
+    .hero__copy {
+      max-width: 650px;
+      margin-bottom: 30px;
+      color: #556b60;
+      font-size: 16px;
+    }
+    .hero__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 45px;
+      padding: 10px 18px;
+      border: 1px solid #dce4dd;
+      border-radius: 999px;
+      background: #fff;
+      color: #173f33;
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .045em;
+      text-decoration: none;
+      transition: transform .2s, background .2s, border-color .2s;
+    }
+    .button:hover { transform: translateY(-2px); border-color: #55bb84; background: #f1f5f0; }
+    .button--primary { border-color: #27724d; background: #27724d; color: #fff; }
+    .button--primary:hover { background: #32865c; color: #fff; }
+    .content { padding: 82px 28px 96px; }
+    .section-heading { max-width: 690px; margin-bottom: 28px; }
+    .section-heading h2 { margin-bottom: 12px; color: #173f33; font-size: clamp(30px, 4vw, 45px); letter-spacing: -.04em; line-height: 1.1; }
+    .section-heading p { margin-bottom: 0; color: #65766c; font-size: 14px; }
+    .device-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; }
+    .device-card {
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid #e7e2d8;
+      border-radius: 20px;
+      background: #fffef9;
+      box-shadow: 0 12px 32px rgba(26,51,40,.05);
+      transition: transform .2s, border-color .2s;
+    }
+    .device-card:hover { transform: translateY(-3px); border-color: #b9d4c2; }
+    .device-card__image {
+      display: grid;
+      height: 190px;
+      overflow: hidden;
+      place-items: center;
+      border-radius: 13px;
+      background: radial-gradient(ellipse at center, #fff 0%, #f1f3ed 76%, #e7ece5 100%);
+    }
+    .device-card__image img { display: block; width: 100%; height: 100%; padding: 12px; object-fit: contain; }
+    .device-card__body { padding: 17px 10px 13px; }
+    .device-card__label { margin: 0 0 3px; color: #438765; font-size: 10px; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
+    .device-card h3 { margin: 0 0 9px; color: #173f33; font-size: 17px; letter-spacing: -.025em; }
+    .device-card__body > p { margin-bottom: 0; color: #5a6e62; font-size: 12px; line-height: 1.6; }
+    .device-card strong { color: #173f33; }
+    .detail {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(250px, .72fr);
+      gap: 34px;
+      align-items: start;
+      margin-top: 76px;
+      padding: 36px;
+      border: 1px solid #e7e2d8;
+      border-radius: 24px;
+      background: #f8f7ef;
+      box-shadow: 0 14px 38px rgba(26,51,40,.05);
+      scroll-margin-top: 92px;
+    }
+    .detail + .detail { margin-top: 20px; }
+    .detail__number { margin-bottom: 10px; color: #438765; font: 700 11px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .13em; }
+    .detail h2 { margin-bottom: 12px; color: #173f33; font-size: clamp(26px, 3.4vw, 37px); letter-spacing: -.04em; line-height: 1.1; }
+    .detail__copy { margin-bottom: 18px; color: #53675d; font-size: 14px; }
+    .detail h3 { margin: 22px 0 8px; color: #173f33; font-size: 14px; }
+    .detail ul { display: grid; gap: 8px; margin: 0; padding-left: 19px; color: #53675d; font-size: 13px; }
+    .detail li::marker { color: #438765; }
+    .detail__aside {
+      padding: 22px;
+      border: 1px solid #e5e3d9;
+      border-radius: 17px;
+      background: #fff;
+    }
+    .detail__aside h3 { margin: 0 0 14px; color: #173f33; }
+    .spec-list { display: grid; gap: 12px; margin: 0; }
+    .spec-list div { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid #e9e8e1; }
+    .spec-list div:last-child { padding-bottom: 0; border: 0; }
+    .spec-list dt { color: #65766c; font-size: 11px; }
+    .spec-list dd { margin: 0; color: #173f33; font-size: 11px; font-weight: 700; text-align: right; }
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .flow__step { padding: 17px; border: 1px solid #e7e2d8; border-radius: 15px; background: #fffef9; }
+    .flow__step span { display: block; margin-bottom: 7px; color: #438765; font: 700 10px ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .flow__step strong { display: block; margin-bottom: 4px; color: #173f33; font-size: 12px; }
+    .flow__step p { margin: 0; color: #65766c; font-size: 11px; line-height: 1.5; }
+    .page-footer { padding: 25px 28px; border-top: 1px solid #e7e8e1; color: #65766c; font-size: 12px; text-align: center; }
+    .page-footer a { color: #438765; text-decoration: none; }
+    @media (max-width: 760px) {
+      html { scroll-padding-top: 128px; }
+      .site-header { flex-wrap: wrap; gap: 10px 14px; padding: 9px 20px; }
+      .site-header > nav { order: 3; flex: 1 1 100%; min-width: 0; }
+      .main-nav { order: 3; width: 100%; min-width: 0; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
+      .main-nav::-webkit-scrollbar { display: none; }
+      .main-nav a { padding: 7px 11px; font-size: 9px; }
+      .header-link { order: 2; margin-left: auto; padding: 8px 11px; font-size: 9px; }
+      .hero { padding: 76px 20px 65px; }
+      .content { padding: 64px 20px 72px; }
+      .device-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+      .device-card__image { height: 145px; }
+      .device-card__body { padding: 13px 7px 9px; }
+      .device-card h3 { font-size: 15px; }
+      .device-card__body > p { font-size: 11px; }
+      .detail { grid-template-columns: 1fr; gap: 22px; margin-top: 54px; padding: 24px; scroll-margin-top: 0; }
+      .flow { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 420px) {
+      .brand { font-size: 17px; }
+      .hero__copy { font-size: 14px; }
+      .device-grid { grid-template-columns: 1fr; }
+      .device-card__image { height: 190px; }
+      .flow { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html#beranda" aria-label="DiHutan, kembali ke beranda">
+      <img src="logo-dihutan.png" alt="" />
+      <span>dihutan</span>
+    </a>
+    <nav aria-label="Navigasi teknologi">
+      <ul class="main-nav">
+        <li><a href="#perangkat">Perangkat</a></li>
+        <li><a href="#iot-monitoring">IoT</a></li>
+        <li><a href="#ai-forest-guardian">AI Guardian</a></li>
+        <li><a href="#autospray">AutoSpray</a></li>
+        <li><a href="#alur-kerja">Alur Kerja</a></li>
+      </ul>
+    </nav>
+    <a class="header-link" href="index.html#teknologi">Beranda <span aria-hidden="true">→</span></a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero__inner">
+        <p class="eyebrow">TEKNOLOGI DIHUTAN · KALIMANTAN BARAT</p>
+        <h1>Dari sensor,<br />menjadi aksi.</h1>
+        <p class="hero__copy">
+          Kenali perangkat yang bekerja di lapangan, data yang dikirim ke tim pemantau,
+          dan bagaimana sistem membantu menjaga gambut tetap basah sebelum api muncul.
+        </p>
+        <div class="hero__actions">
+          <a class="button button--primary" href="#perangkat">KENALI PERANGKAT</a>
+          <a class="button" href="#alur-kerja">LIHAT ALUR KERJA</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="content">
+      <section id="perangkat" aria-labelledby="devices-title">
+        <div class="section-heading">
+          <p class="eyebrow">PERANGKAT LAPANGAN</p>
+          <h2 id="devices-title">Perangkat IoT yang digunakan</h2>
+          <p>Ini foto perangkat yang disiapkan untuk membaca kondisi lapangan, mengolah sinyal sensor, dan mengendalikan aliran air.</p>
+        </div>
+
+        <div class="device-grid">
+          <article class="device-card">
+            <div class="device-card__image">
+              <img src="device-images/esp32-development-board.webp" alt="Papan mikrokontroler ESP32 Development Board" />
+            </div>
+            <div class="device-card__body">
+              <p class="device-card__label">PENGENDALI</p>
+              <h3>ESP32 Development Board</h3>
+              <p>Membaca keluaran sensor dan menjalankan logika kendali sebelum data dikirim ke sistem pemantauan.</p>
+            </div>
+          </article>
+
+          <article class="device-card">
+            <div class="device-card__image">
+              <img src="device-images/soil-moisture-sensor.webp" alt="Modul sensor kelembapan tanah dengan probe" />
+            </div>
+            <div class="device-card__body">
+              <p class="device-card__label">SENSOR TANAH</p>
+              <h3>Soil Moisture Sensor</h3>
+              <p>Mendeteksi perubahan kadar air tanah melalui probe, sebagai salah satu indikator kondisi lahan yang mulai mengering.</p>
+            </div>
+          </article>
+
+          <article class="device-card">
+            <div class="device-card__image">
+              <img src="device-images/esp32-expansion-board.webp" alt="Papan ekspansi untuk ESP32" />
+            </div>
+            <div class="device-card__body">
+              <p class="device-card__label">PENGEMBANGAN</p>
+              <h3>ESP32 Expansion Board</h3>
+              <p>Memudahkan pemasangan ESP32 dan koneksi ke modul lain saat merakit atau menguji sistem sensor.</p>
+            </div>
+          </article>
+
+          <article class="device-card">
+            <div class="device-card__image">
+              <img src="device-images/relay-module.webp" alt="Modul relay satu kanal berwarna biru" />
+            </div>
+            <div class="device-card__body">
+              <p class="device-card__label">SAKLAR ELEKTRONIK</p>
+              <h3>Relay Module</h3>
+              <p>Menghubungkan sinyal kendali dari mikrokontroler untuk menyalakan atau mematikan beban, seperti pompa.</p>
+            </div>
+          </article>
+
+          <article class="device-card">
+            <div class="device-card__image">
+              <img src="device-images/mini-water-pump.webp" alt="Pompa air mini dengan selang bening" />
+            </div>
+            <div class="device-card__body">
+              <p class="device-card__label">AKTUATOR AIR</p>
+              <h3>Mini Water Pump</h3>
+              <p>Mendorong air melalui selang untuk membantu proses pembasahan pada prototipe atau titik yang dilayani.</p>
+            </div>
+          </article>
+
+          <article class="device-card">
+            <div class="device-card__image">
+              <img src="device-images/solenoid-valve.webp" alt="Katup solenoid untuk mengatur aliran air" />
+            </div>
+            <div class="device-card__body">
+              <p class="device-card__label">KENDALI ALIRAN</p>
+              <h3>Solenoid Valve</h3>
+              <p>Membuka atau menutup aliran air saat menerima kendali elektrik, sehingga distribusi air dapat diatur otomatis.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="detail" id="iot-monitoring" aria-labelledby="iot-title">
+        <div>
+          <p class="detail__number">01 / TELEMETRI</p>
+          <h2 id="iot-title">IoT Monitoring</h2>
+          <p class="detail__copy">IoT menghubungkan sensor di lapangan dengan aplikasi pemantauan. Petugas dapat melihat kondisi lokasi tanpa harus selalu datang ke setiap titik.</p>
+          <h3>Untuk apa sistem ini?</h3>
+          <ul>
+            <li>Memantau tinggi muka air gambut agar penurunan bisa diketahui lebih awal.</li>
+            <li>Mengamati suhu dan kelembapan sebagai indikator perubahan kondisi lahan.</li>
+            <li>Mengirim data berkala untuk ditinjau melalui dashboard dan peta pemantauan.</li>
+          </ul>
+        </div>
+        <aside class="detail__aside">
+          <h3>Data yang dipantau</h3>
+          <dl class="spec-list">
+            <div><dt>Tinggi muka air</dt><dd>Level air gambut</dd></div>
+            <div><dt>Kelembapan tanah</dt><dd>Kondisi lahan</dd></div>
+            <div><dt>Suhu gambut</dt><dd>Mikroklimat</dd></div>
+            <div><dt>Pengiriman data</dt><dd>Telemetri lapangan</dd></div>
+          </dl>
+        </aside>
+      </section>
+
+      <section class="detail" id="ai-forest-guardian" aria-labelledby="ai-title">
+        <div>
+          <p class="detail__number">02 / KECERDASAN</p>
+          <h2 id="ai-title">AI Forest Guardian</h2>
+          <p class="detail__copy">AI Forest Guardian mengolah data telemetri dan informasi kondisi lingkungan untuk membantu mengenali pola yang tidak biasa. AI adalah lapisan analisis—bukan sensor fisik—yang membantu tim menentukan area yang perlu diperiksa.</p>
+          <h3>Perannya dalam pencegahan</h3>
+          <ul>
+            <li>Menggabungkan pembacaan sensor dan konteks kondisi lingkungan.</li>
+            <li>Menandai perubahan atau anomali untuk ditinjau petugas.</li>
+            <li>Mendukung pemetaan risiko dan prioritas tindak lanjut di lapangan.</li>
+          </ul>
+        </div>
+        <aside class="detail__aside">
+          <h3>Dari data ke peringatan</h3>
+          <dl class="spec-list">
+            <div><dt>Masukan</dt><dd>Data sensor</dd></div>
+            <div><dt>Analisis</dt><dd>Pola & anomali</dd></div>
+            <div><dt>Hasil</dt><dd>Indikasi risiko</dd></div>
+            <div><dt>Tindak lanjut</dt><dd>Verifikasi petugas</dd></div>
+          </dl>
+        </aside>
+      </section>
+
+      <section class="detail" id="autospray" aria-labelledby="autospray-title">
+        <div>
+          <p class="detail__number">03 / OTOMASI</p>
+          <h2 id="autospray-title">AutoSpray</h2>
+          <p class="detail__copy">AutoSpray adalah sistem pembasahan otomatis yang menghubungkan pembacaan kondisi air dengan pompa dan sprinkler. Saat batas kering yang ditentukan tercapai, sistem dapat membantu memulai pembasahan tanpa menunggu pemeriksaan manual di lokasi.</p>
+          <h3>Manfaatnya</h3>
+          <ul>
+            <li>Membantu menjaga kelembapan lahan gambut pada titik prioritas.</li>
+            <li>Mengurangi jeda antara terdeteksinya kondisi kering dan respons awal.</li>
+            <li>Memberikan status operasi yang dapat dipantau oleh petugas.</li>
+          </ul>
+        </div>
+        <aside class="detail__aside">
+          <h3>Komponen utama</h3>
+          <dl class="spec-list">
+            <div><dt>Pemicu</dt><dd>Ambang TMA</dd></div>
+            <div><dt>Pengendali</dt><dd>Mikrokontroler</dd></div>
+            <div><dt>Aktuator</dt><dd>Pompa & sprinkler</dd></div>
+            <div><dt>Tujuan</dt><dd>Pembasahan gambut</dd></div>
+          </dl>
+        </aside>
+      </section>
+
+      <section id="alur-kerja" style="margin-top: 78px;" aria-labelledby="flow-title">
+        <div class="section-heading">
+          <p class="eyebrow">SATU SISTEM, BANYAK LAPISAN</p>
+          <h2 id="flow-title">Bagaimana semuanya bekerja bersama?</h2>
+          <p>Sensor membantu membaca kondisi, jaringan mengirim informasi, dan petugas maupun sistem otomasi menindaklanjuti data.</p>
+        </div>
+        <div class="flow">
+          <div class="flow__step"><span>LANGKAH 01</span><strong>Sensor membaca</strong><p>TMA, suhu, dan kelembapan dipantau di titik lapangan.</p></div>
+          <div class="flow__step"><span>LANGKAH 02</span><strong>Data dikirim</strong><p>ESP32 meneruskan pembacaan melalui konektivitas yang tersedia.</p></div>
+          <div class="flow__step"><span>LANGKAH 03</span><strong>Risiko ditinjau</strong><p>Dashboard dan analisis membantu petugas melihat perubahan.</p></div>
+          <div class="flow__step"><span>LANGKAH 04</span><strong>Respons dilakukan</strong><p>Petugas memverifikasi dan AutoSpray dapat membantu pembasahan.</p></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="page-footer">
+    <a href="index.html#teknologi">← Kembali ke teknologi DiHutan</a>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,2674 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DiHutan — Jaga Hutan, Cegah Karhutla</title>
+  <meta name="description" content="Platform monitoring cerdas berbasis IoT, telemetri muka air gambut, dan sistem peringatan dini untuk menjaga ekosistem hutan Kalimantan Barat bebas dari kebakaran hutan dan lahan." />
+
+  <!-- Google Fonts: Inter for body, Barlow Condensed for hero heading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Leaflet Map library for real interactive Kalimantan map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --green-dark:    #1a3328;
+      --green-mid:     #2d5a3d;
+      --green-accent:  #3a7d52;
+      --green-light:   #4ade80;
+      --white:         #ffffff;
+      --white-70:      rgba(255,255,255,0.70);
+      --white-50:      rgba(255,255,255,0.50);
+      --white-15:      rgba(255,255,255,0.15);
+      --white-08:      rgba(255,255,255,0.08);
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      color: var(--white);
+      background: #0c1a10;
+      overflow-x: hidden;
+    }
+
+    /* ===== HERO SECTION ===== */
+    .hero {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero__bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('hero-bg.png');
+      background-size: cover;
+      background-position: center 30%;
+      z-index: 0;
+    }
+
+    /* Dark green gradient overlay — left heavy, right reveals image */
+    .hero__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        100deg,
+        rgba(8, 20, 12, 0.90) 0%,
+        rgba(8, 20, 12, 0.78) 38%,
+        rgba(8, 20, 12, 0.30) 65%,
+        rgba(8, 20, 12, 0.10) 100%
+      );
+      z-index: 1;
+    }
+
+    .hero__overlay-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 220px;
+      background: linear-gradient(to top, rgba(8, 20, 12, 0.85) 0%, transparent 100%);
+      z-index: 1;
+    }
+
+    .hero__inner {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding-top: 58px;
+    }
+
+    /* ===== NAVBAR ===== */
+    nav.navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      width: 100%;
+      padding: 12px 34px;
+      background: rgba(9, 32, 23, 0.42);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .nav__logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      letter-spacing: -0.5px;
+      color: var(--white);
+      text-decoration: none;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .nav__logo img {
+      display: block;
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
+    }
+
+    .nav__links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 100px;
+      padding: 5px 6px;
+      list-style: none;
+    }
+
+    .nav__links li a {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 12.5px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--white-70);
+      text-decoration: none;
+      padding: 7px 18px;
+      border-radius: 100px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .nav__links li a:hover {
+      color: var(--white);
+      background: rgba(255,255,255,0.10);
+    }
+
+    .nav__links li a.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--white);
+    }
+
+    .nav__cta {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 12.5px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--green-dark);
+      background: #f7f7ef;
+      text-decoration: none;
+      border: 1.5px solid #f7f7ef;
+      border-radius: 100px;
+      padding: 10px 24px;
+      transition: background 0.22s, color 0.22s, border-color 0.22s;
+      white-space: nowrap;
+    }
+
+    .nav__cta:hover {
+      background: transparent;
+      color: var(--white);
+      border-color: var(--white);
+    }
+
+    /* ===== HERO CONTENT ===== */
+    .hero__content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 48px;
+      padding-top: 24px;
+      max-width: 640px;
+    }
+
+    .hero__eyebrow {
+      display: none;
+    }
+
+    .hero__heading {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(42px, 5.5vw, 72px);
+      line-height: 0.93;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 22px;
+    }
+
+    .hero__heading .leaf-icon {
+      display: inline-block;
+      font-size: 0.55em;
+      vertical-align: middle;
+      margin-left: 4px;
+      line-height: 1;
+      position: relative;
+      top: -4px;
+      animation: leaf-sway 3s ease-in-out infinite;
+    }
+
+    @keyframes leaf-sway {
+      0%, 100% { transform: rotate(-6deg); }
+      50%       { transform: rotate(6deg); }
+    }
+
+    .hero__desc {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--white-70);
+      max-width: 390px;
+      margin-bottom: 28px;
+    }
+
+    /* ===== BUTTONS ===== */
+    .hero__buttons {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 64px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--white);
+      background: var(--green-dark);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 100px;
+      padding: 10px 22px;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: background 0.22s, transform 0.18s;
+    }
+
+    .btn-primary:hover {
+      background: var(--green-mid);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary .arrow {
+      font-size: 16px;
+      transition: transform 0.2s;
+    }
+
+    .btn-primary:hover .arrow {
+      transform: translateX(4px);
+    }
+
+    .btn-video {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 12px;
+      color: var(--white);
+      background: rgba(255,255,255,0.10);
+      border: 1.5px solid rgba(255,255,255,0.22);
+      border-radius: 100px;
+      padding: 5px 16px 5px 6px;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: background 0.22s, transform 0.18s;
+    }
+
+    .btn-video:hover {
+      background: rgba(255,255,255,0.18);
+      transform: translateY(-1px);
+    }
+
+    .btn-video .play-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      border: 1.5px solid rgba(255,255,255,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    .btn-video:hover .play-icon {
+      background: rgba(255,255,255,0.28);
+    }
+
+    .btn-video .play-icon svg {
+      width: 12px;
+      height: 12px;
+      fill: var(--white);
+      margin-left: 2px;
+    }
+
+
+
+    /* ===== CAPABILITIES SECTION ===== */
+    .capabilities {
+      background: #ffffff;
+      padding: 72px 0 56px;
+      overflow: hidden;
+    }
+
+    .capabilities__header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 52px;
+      margin-bottom: 36px;
+    }
+
+    .capabilities__eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #5a7a62;
+      margin-bottom: 10px;
+    }
+
+    .capabilities__title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(34px, 4vw, 58px);
+      line-height: 0.92;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: #1a2e22;
+    }
+
+    .capabilities__link {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 11.5px;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: #2d5a3d;
+      text-decoration: none;
+      white-space: nowrap;
+      padding-bottom: 2px;
+      border-bottom: 1.5px solid #2d5a3d;
+      transition: color 0.2s, border-color 0.2s;
+      margin-bottom: 6px;
+    }
+
+    .capabilities__link:hover {
+      color: #3a7d52;
+      border-color: #3a7d52;
+    }
+
+    /* ---- Carousel track ---- */
+    .cards-carousel-wrap {
+      position: relative;
+      margin: 0 52px;
+      overflow: hidden;
+      padding: 14px 0 24px;
+    }
+
+    .cards-track {
+      display: flex;
+      gap: 20px;
+      padding: 0;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .cards-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cards-track.is-dragging {
+      cursor: grabbing;
+      scroll-snap-type: none;
+    }
+
+    /* ---- Feature Card ---- */
+    .feat-card {
+      flex: 0 0 calc((100% - 60px) / 4);
+      width: calc((100% - 60px) / 4);
+      min-width: 200px;
+      box-sizing: border-box;
+      background: #fffef9;
+      border: 1.5px solid #e2ddd5;
+      border-radius: 18px;
+      padding: 26px 22px 28px;
+      scroll-snap-align: start;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feat-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(58,125,82,0.06) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .feat-card:hover::before,
+    .feat-card.active::before {
+      opacity: 1;
+    }
+
+    .feat-card:hover {
+      border-color: #3a7d52;
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(26,51,40,0.10);
+    }
+
+    .feat-card.active {
+      border-color: #3a7d52;
+      border-width: 2px;
+      box-shadow: 0 8px 28px rgba(26,51,40,0.12);
+    }
+
+    .feat-card__icon-wrap {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: #f0ede6;
+      border: 1px solid #ddd9d0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      transition: background 0.25s;
+    }
+
+    .feat-card:hover .feat-card__icon-wrap,
+    .feat-card.active .feat-card__icon-wrap {
+      background: #d8ede0;
+      border-color: #aed4bb;
+    }
+
+    .feat-card__icon-wrap svg {
+      width: 18px;
+      height: 18px;
+      stroke: #2d5a3d;
+      fill: none;
+      stroke-width: 1.7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .feat-card__tag {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #1a2e22;
+      margin-bottom: 12px;
+    }
+
+    .feat-card__subtitle {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: #6b8c74;
+      margin-bottom: 8px;
+    }
+
+    .feat-card__desc {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: 11.5px;
+      line-height: 1.65;
+      color: #5a6e62;
+      margin-bottom: 14px;
+    }
+
+    .feat-card__divider {
+      height: 1px;
+      background: #e8e4dc;
+      margin: 14px 0;
+    }
+
+    /* ---- Pill scrubber indicator ---- */
+    .carousel-scrubber {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      margin-top: 24px;
+      padding-bottom: 4px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .scrubber-pill {
+      height: 6px;
+      border-radius: 3px;
+      background: #c8c3b8;
+      width: 18px;
+      transition: width 0.3s cubic-bezier(.4,0,.2,1), background 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .scrubber-pill.active {
+      width: 36px;
+      background: #2d5a3d;
+    }
+
+    /* ===== QUOTE SECTION ===== */
+    .quote-section {
+      background: #0c1a10;
+      margin: 48px 32px;
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+      min-height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quote-section__bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('hero-bg.png');
+      background-size: cover;
+      background-position: center 40%;
+      filter: brightness(0.35) saturate(0.6);
+    }
+
+    .quote-section__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(8,20,12,0.55) 0%, rgba(8,20,12,0.30) 100%);
+    }
+
+    .quote-section__content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 52px 48px;
+      max-width: 700px;
+    }
+
+    .quote-section__text {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: clamp(22px, 3vw, 38px);
+      line-height: 1.08;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin-bottom: 18px;
+    }
+
+    .quote-section__source {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+
+    /* ===== TEKNOLOGI SECTION ===== */
+    .tech-section {
+      background: #10271b;
+      padding: 92px 52px 104px;
+      position: relative;
+    }
+
+    .tech-section__header {
+      max-width: 680px;
+      margin-bottom: 44px;
+    }
+
+    .tech-section__eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #52b788;
+      margin-bottom: 12px;
+    }
+
+    .tech-section__title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(38px, 4.5vw, 64px);
+      line-height: 0.94;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin-bottom: 18px;
+    }
+
+    .tech-section__desc {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: rgba(255, 255, 255, 0.70);
+      max-width: 540px;
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .tech-card {
+      background: #163625;
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 28px 24px 26px;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      position: relative;
+    }
+
+    .tech-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(74, 222, 128, 0.35);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+    }
+
+    .tech-card__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .tech-card__pill {
+      font-family: 'Inter', monospace, sans-serif;
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #9cd4b5;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 100px;
+      padding: 4px 12px;
+    }
+
+    .tech-card__status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .tech-card__status-dot--green {
+      background: #4ade80;
+      box-shadow: 0 0 10px rgba(74, 222, 128, 0.85);
+    }
+
+    .tech-card__status-dot--blue {
+      background: #60a5fa;
+      box-shadow: 0 0 10px rgba(96, 165, 250, 0.85);
+    }
+
+    .tech-card__status-dot--yellow {
+      background: #fbbf24;
+      box-shadow: 0 0 10px rgba(251, 191, 36, 0.85);
+    }
+
+    .tech-card__title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 26px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin-bottom: 12px;
+    }
+
+    .tech-card__desc {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: 11.8px;
+      line-height: 1.65;
+      color: rgba(255, 255, 255, 0.65);
+      flex-grow: 1;
+      margin-bottom: 20px;
+    }
+
+    .tech-card__specs {
+      background: #0d1e15;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-family: 'Inter', monospace, sans-serif;
+    }
+
+    .tech-spec-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    .tech-spec-label {
+      color: rgba(255, 255, 255, 0.45);
+      font-weight: 400;
+    }
+
+    .tech-spec-val {
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .tech-spec-val--green {
+      color: #4ade80;
+    }
+
+    .tech-spec-val--yellow {
+      color: #fbbf24;
+    }
+
+    .tech-card__link {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 10.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #52b788;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s, transform 0.2s;
+      align-self: flex-start;
+    }
+
+    .tech-card__link:hover {
+      color: #74c69d;
+      transform: translateX(3px);
+    }
+
+    /* ===== MAP MONITORING SECTION ===== */
+    .map-section {
+      background: #ffffff;
+      padding: 96px 52px 108px;
+      position: relative;
+    }
+
+    .map-section__header {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto 52px;
+    }
+
+    .map-section__eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #3a7d52;
+      margin-bottom: 12px;
+    }
+
+    .map-section__title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(38px, 4.8vw, 64px);
+      line-height: 0.94;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: #153222;
+      margin-bottom: 16px;
+    }
+
+    .map-section__desc {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: #5a6e62;
+    }
+
+    /* Outer Card */
+    .map-monitor-card {
+      background: #ffffff;
+      border: 1.5px solid #e7e2d8;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 16px 48px rgba(26, 51, 40, 0.06);
+      max-width: 1220px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    /* Left Map Container */
+    .map-canvas-container {
+      position: relative;
+      background: #f1ede4;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1.5px solid #ded9ce;
+      height: 440px;
+      width: 100%;
+    }
+
+    #kalimantanMap {
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Badge Koordinat Top-Left */
+    .map-badge-coord {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 500;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
+      padding: 10px 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      pointer-events: none;
+    }
+
+    .map-badge-coord__title {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 11.5px;
+      color: #1a3328;
+      margin-bottom: 2px;
+    }
+
+    .map-badge-coord__sub {
+      font-family: 'Inter', monospace, sans-serif;
+      font-weight: 500;
+      font-size: 10px;
+      color: #6b7280;
+    }
+
+    /* Compass Rose Top-Right */
+    .map-compass-rose {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 500;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .map-compass-rose span {
+      font-family: 'Inter', sans-serif;
+      font-weight: 800;
+      font-size: 10px;
+      color: #1a3328;
+      line-height: 1;
+    }
+
+    .map-compass-rose::after {
+      content: '';
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #ef4444;
+      margin-top: 2px;
+    }
+
+    /* Map Pulsing Pins */
+    .custom-leaflet-pin {
+      background: transparent !important;
+      border: none !important;
+    }
+
+    .map-pin {
+      position: relative;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2.5px solid #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+    }
+
+    .map-pin--red {
+      background: #ef4444;
+    }
+
+    .map-pin--yellow {
+      background: #f59e0b;
+    }
+
+    .map-pin--green {
+      background: #22c55e;
+    }
+
+    .map-pin__pulse {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      animation: pulse-ring 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+    }
+
+    .map-pin--red .map-pin__pulse {
+      background: rgba(239, 68, 68, 0.45);
+    }
+
+    .map-pin--yellow .map-pin__pulse {
+      background: rgba(245, 158, 11, 0.4);
+    }
+
+    .map-pin--green .map-pin__pulse {
+      background: rgba(34, 197, 94, 0.35);
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.7); opacity: 1; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    /* Right Legend Panel */
+    .map-legend-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .map-legend-panel__title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 28px;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+      color: #153222;
+      margin-bottom: 8px;
+    }
+
+    .map-legend-panel__desc {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: 12.5px;
+      line-height: 1.65;
+      color: #5a6e62;
+      margin-bottom: 24px;
+    }
+
+    .map-legend-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .map-legend-item {
+      background: #f8f6f0;
+      border: 1px solid #eae5d9;
+      border-radius: 14px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .map-legend-item:hover {
+      background: #f2eee3;
+      border-color: #ded8cb;
+    }
+
+    .map-legend-item__status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .map-legend-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .map-legend-dot--green {
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+    }
+
+    .map-legend-dot--yellow {
+      background: #f59e0b;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+    }
+
+    .map-legend-dot--red {
+      background: #ef4444;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    }
+
+    .map-legend-item__label {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      color: #1a3328;
+    }
+
+    .map-legend-item__tma {
+      font-family: 'Inter', monospace, sans-serif;
+      font-weight: 600;
+      font-size: 11.5px;
+      color: #5a6e62;
+    }
+
+    .btn-buka-peta {
+      background: #163625;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 15px 24px;
+      border-radius: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      box-shadow: 0 6px 18px rgba(22, 54, 37, 0.25);
+      transition: background 0.22s, transform 0.18s, box-shadow 0.22s;
+    }
+
+    .btn-buka-peta:hover {
+      background: #235238;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(22, 54, 37, 0.32);
+      color: #ffffff;
+    }
+
+    /* ===== APP DOWNLOAD SECTION ===== */
+    .app-section {
+      position: relative;
+      background: #ffffff;
+      padding: 70px 0 0;
+      overflow: hidden;
+    }
+
+    /* Cream organic flowing shape backdrop */
+    .app-section__cream-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .app-section__cream-bg svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .app-section__inner {
+      position: relative;
+      z-index: 2;
+      max-width: 1220px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 48px;
+      align-items: center;
+      min-height: 560px;
+      padding: 0 52px 20px;
+    }
+
+    /* Left Copy */
+    .app-copy {
+      max-width: 520px;
+      padding: 40px 0;
+    }
+
+    .app-copy__eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #173f33;
+      margin-bottom: 14px;
+    }
+
+    .app-copy__title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(44px, 5.2vw, 76px);
+      line-height: 0.92;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: #173f33;
+      margin-bottom: 22px;
+    }
+
+    .app-copy__desc {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: 13.5px;
+      line-height: 1.68;
+      color: #4a5c52;
+      margin-bottom: 32px;
+    }
+
+    .btn-download-app {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: #eee9dc;
+      border: 1.5px solid #ded8cb;
+      border-radius: 100px;
+      padding: 13px 26px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #173f33;
+      text-decoration: none;
+      box-shadow: 0 4px 16px rgba(23, 63, 51, 0.08);
+      transition: background 0.22s, transform 0.18s, border-color 0.22s, box-shadow 0.22s;
+      cursor: pointer;
+    }
+
+    .btn-download-app:hover {
+      background: #e4dfd0;
+      border-color: #cbbead;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(23, 63, 51, 0.14);
+    }
+
+    .btn-download-app svg {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: #173f33;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .app-copy__meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 18px;
+      font-family: 'Inter', sans-serif;
+      font-size: 10.5px;
+      color: #556b60;
+      font-weight: 500;
+    }
+
+    .app-copy__meta-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      flex-shrink: 0;
+    }
+
+    /* Right Phone Visual */
+    .app-phone-wrap {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding-top: 20px;
+    }
+
+    .phone-mockup {
+      width: 310px;
+      height: 580px;
+      background: #173f33;
+      border-radius: 46px;
+      padding: 11px;
+      box-shadow: 0 28px 60px rgba(18, 48, 38, 0.22), 0 10px 24px rgba(0, 0, 0, 0.12);
+      position: relative;
+      border: 3.5px solid #14352b;
+    }
+
+    .phone-mockup__screen {
+      width: 100%;
+      height: 100%;
+      background: #f8f7ef;
+      border-radius: 36px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .phone-mockup__screen img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: top center;
+    }
+
+    .phone-notch {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 86px;
+      height: 16px;
+      background: #173f33;
+      border-radius: 20px;
+      z-index: 20;
+    }
+
+    /* Screen internal UI styling */
+    .phone-screen-content {
+      padding: 34px 16px 16px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: #fbfaf7;
+    }
+
+    .phone-top-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: #718096;
+      margin-bottom: 14px;
+    }
+
+    .phone-app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .phone-app-logo {
+      font-size: 14px;
+      font-weight: 800;
+      color: #173f33;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .phone-app-bell {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #eee9dc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+
+    .phone-status-card {
+      background: #173f33;
+      color: #ffffff;
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .phone-status-card::after {
+      content: '';
+      position: absolute;
+      right: -10px;
+      bottom: -10px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(74, 222, 128, 0.12);
+    }
+
+    .phone-status-tag {
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #4ade80;
+      margin-bottom: 4px;
+    }
+
+    .phone-status-val {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .phone-status-grid {
+      display: flex;
+      gap: 10px;
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .phone-mini-map {
+      background: #e9e5db;
+      border-radius: 14px;
+      height: 110px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 12px;
+      border: 1px solid #ddd7c9;
+      background-image: radial-gradient(#d3cbbd 1.5px, transparent 1.5px);
+      background-size: 12px 12px;
+    }
+
+    .phone-mini-map__river {
+      position: absolute;
+      width: 120%;
+      height: 8px;
+      background: #9fc3db;
+      top: 50%;
+      left: -10%;
+      transform: rotate(-15deg);
+      border-radius: 4px;
+    }
+
+    .phone-mini-pin {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1.5px solid white;
+    }
+
+    .phone-mini-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: auto;
+    }
+
+    .phone-mini-btn {
+      background: #ffffff;
+      border: 1px solid #e7e2d8;
+      border-radius: 10px;
+      padding: 8px 4px;
+      text-align: center;
+      font-size: 8px;
+      font-weight: 700;
+      color: #173f33;
+    }
+
+    /* Floating Field Badge */
+    .app-floating-badge {
+      position: absolute;
+      bottom: 40px;
+      left: 15px;
+      z-index: 30;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 12px 18px;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.06);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      animation: badge-float 4s ease-in-out infinite;
+    }
+
+    @keyframes badge-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .app-floating-badge__icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #173f33;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .app-floating-badge__text strong {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #173f33;
+      line-height: 1.25;
+      margin-bottom: 2px;
+    }
+
+    .app-floating-badge__text span {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      color: #718096;
+      font-weight: 400;
+    }
+
+    /* Bottom Dark Green Wave into Footer */
+    .app-section__wave-bottom {
+      width: 100%;
+      display: block;
+      margin-bottom: -3px;
+      line-height: 0;
+      position: relative;
+      z-index: 5;
+    }
+
+    .app-section__wave-bottom svg {
+      width: 100%;
+      height: 130px;
+      display: block;
+    }
+
+    /* ===== FOOTER ===== */
+    .site-footer {
+      background: #173f33;
+      color: #ffffff;
+      padding: 32px 52px 36px;
+      position: relative;
+      z-index: 6;
+    }
+
+    .footer-top {
+      max-width: 1220px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.4fr 0.9fr 0.9fr 1.3fr;
+      gap: 48px;
+      padding-bottom: 44px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .footer-col__logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .footer-col__logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #235445;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .footer-col__logo-title {
+      font-family: 'Inter', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+    }
+
+    .footer-col__about {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      line-height: 1.68;
+      color: rgba(255, 255, 255, 0.70);
+      max-width: 310px;
+    }
+
+    .footer-col__heading {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.92);
+      margin-bottom: 18px;
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-links a {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.65);
+      text-decoration: none;
+      transition: color 0.2s, transform 0.2s;
+      display: inline-block;
+    }
+
+    .footer-links a:hover {
+      color: #4ade80;
+      transform: translateX(3px);
+    }
+
+    .footer-col__buletin-desc {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      line-height: 1.65;
+      color: rgba(255, 255, 255, 0.70);
+      margin-bottom: 18px;
+    }
+
+    .footer-newsletter {
+      position: relative;
+      max-width: 340px;
+    }
+
+    .footer-newsletter__input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 100px;
+      padding: 11px 48px 11px 18px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      color: #ffffff;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .footer-newsletter__input:focus {
+      border-color: #4ade80;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .footer-newsletter__input::placeholder {
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .footer-newsletter__btn {
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #84d8a7;
+      color: #173f33;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .footer-newsletter__btn:hover {
+      background: #a3e9c0;
+      transform: translateY(-50%) scale(1.05);
+    }
+
+    /* Bottom Bar */
+    .footer-bottom {
+      max-width: 1220px;
+      margin: 24px auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.55);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-bottom__links {
+      display: flex;
+      gap: 22px;
+    }
+
+    .footer-bottom__links a {
+      color: rgba(255, 255, 255, 0.55);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-bottom__links a:hover {
+      color: #ffffff;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .capabilities__header {
+        padding: 0 36px;
+      }
+      .cards-carousel-wrap {
+        margin: 0 36px;
+      }
+      .feat-card {
+        flex: 0 0 calc((100% - 40px) / 3);
+        width: calc((100% - 40px) / 3);
+      }
+      .tech-section {
+        padding: 72px 36px 80px;
+      }
+      .tech-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .map-section {
+        padding: 72px 36px 80px;
+      }
+      .map-monitor-card {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 24px;
+      }
+      .map-canvas-container {
+        height: 380px;
+      }
+      .app-section {
+        padding: 50px 0 0;
+      }
+      .app-section__inner {
+        padding: 0 36px 20px;
+        grid-template-columns: 1fr;
+        gap: 36px;
+      }
+      .app-phone-wrap {
+        justify-content: center;
+      }
+      .footer-top {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 36px;
+      }
+      .site-footer {
+        padding: 24px 36px 36px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav.navbar {
+        padding: 12px 24px;
+        flex-wrap: wrap;
+        gap: 14px;
+      }
+
+      .hero__inner {
+        padding-top: 114px;
+      }
+
+      .nav__links {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .hero__content {
+        padding: 24px 24px 0;
+      }
+
+      .hero__stats {
+        padding: 0 24px 36px;
+        gap: 28px;
+        flex-wrap: wrap;
+      }
+
+      .capabilities__header {
+        padding: 0 24px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+      }
+
+      .cards-carousel-wrap {
+        margin: 0 24px;
+      }
+
+      .cards-track {
+        padding: 0;
+      }
+
+      .feat-card {
+        flex: 0 0 calc((100% - 20px) / 2);
+        width: calc((100% - 20px) / 2);
+        min-width: 220px;
+      }
+
+      .quote-section {
+        margin: 32px 16px;
+      }
+
+      .quote-section__content {
+        padding: 40px 28px;
+      }
+
+      .tech-section {
+        padding: 60px 24px 68px;
+      }
+
+      .tech-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .map-section {
+        padding: 60px 24px 68px;
+      }
+
+      .map-canvas-container {
+        height: 320px;
+      }
+
+      .app-section {
+        padding: 40px 0 0;
+      }
+      .app-section__inner {
+        padding: 0 24px 20px;
+      }
+
+      .app-floating-badge {
+        left: 0;
+        bottom: 20px;
+      }
+
+      .footer-top {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+
+      .site-footer {
+        padding: 24px 24px 36px;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+      }
+
+      .footer-bottom__links {
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .feat-card {
+        flex: 0 0 100%;
+        width: 100%;
+        min-width: 100%;
+      }
+      .phone-mockup {
+        width: 280px;
+        height: 520px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <section class="hero" id="beranda" aria-label="Hero section">
+    <div class="hero__bg" aria-hidden="true"></div>
+    <div class="hero__overlay" aria-hidden="true"></div>
+    <div class="hero__overlay-bottom" aria-hidden="true"></div>
+
+    <div class="hero__inner">
+
+      <!-- Navbar -->
+      <nav class="navbar" role="navigation" aria-label="Navigasi utama">
+        <a href="#beranda" class="nav__logo">
+          <img src="logo-dihutan.png" alt="" />
+          <span>dihutan</span>
+        </a>
+
+        <ul class="nav__links" role="list">
+          <li><a href="#beranda"   class="active" id="nav-beranda">Beranda</a></li>
+          <li><a href="#fitur"     id="nav-fitur">Fitur</a></li>
+          <li><a href="#teknologi" id="nav-teknologi">Teknologi</a></li>
+          <li><a href="#peta"      id="nav-peta">Peta Risiko</a></li>
+          <li><a href="#edukasi"   id="nav-edukasi">Edukasi</a></li>
+        </ul>
+
+        <a href="https://drive.google.com/file/d/1OvJh5XtWD4I64kgkJLK69zpy28fiMaIP/view?usp=sharing" class="nav__cta" id="btn-download-app" target="_blank" rel="noopener noreferrer">Download App &nbsp;→</a>
+      </nav>
+
+      <!-- Main copy -->
+      <div class="hero__content">
+        <h1 class="hero__heading">
+          PANTAU HUTAN,<br />
+          KENALI RISIKO, JAGA EKOSISTEM.<span class="leaf-icon">🌿</span>
+        </h1>
+
+        <p class="hero__desc">
+          Platform monitoring cerdas berbasis IoT, telemetri muka air gambut,
+          dan sistem peringatan dini untuk menjaga ekosistem hutan
+          Kalimantan Barat bebas dari kebakaran hutan dan lahan.
+        </p>
+
+        <div class="hero__buttons">
+          <a href="#fitur" class="btn-primary" id="btn-jelajahi">
+            Jelajahi DiHutan
+            <span class="arrow">→</span>
+          </a>
+
+          <a href="#video" class="btn-video" id="btn-watch-video">
+            <span class="play-icon" aria-hidden="true">
+              <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M4 2.5l10 5.5-10 5.5z"/>
+              </svg>
+            </span>
+            Watch Video
+          </a>
+        </div>
+      </div>
+
+
+
+    </div>
+  </section>
+
+  <!-- ===== CAPABILITIES SECTION ===== -->
+  <section class="capabilities" id="fitur" aria-label="Fitur dan Kemampuan">
+    <div class="capabilities__header">
+      <div>
+        <p class="capabilities__eyebrow">Our Capabilities &amp; Impact</p>
+        <h2 class="capabilities__title">Aksi Nyata.<br/>Hutan Lebih Terjaga.</h2>
+      </div>
+      <a href="#fitur" class="capabilities__link" id="btn-lihat-fitur">Lihat Seluruh Fitur &nbsp;→</a>
+    </div>
+
+    <!-- Swipeable cards -->
+    <div class="cards-carousel-wrap">
+      <div class="cards-track" id="cardsTrack" role="list">
+
+        <!-- Card 1: Peta Risiko -->
+        <article class="feat-card" data-real="0" id="card-peta-risiko" role="listitem">
+          <div class="feat-card__icon-wrap" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          </div>
+          <p class="feat-card__tag">Peta Risiko</p>
+          <p class="feat-card__subtitle">Analisis Bahaya</p>
+          <p class="feat-card__desc">Visualisasi peta risiko kebakaran gambut berbasis data cuaca, kelembapan tanah, dan indeks kerentanan wilayah secara real-time.</p>
+          <div class="feat-card__divider"></div>
+          <p class="feat-card__desc">Zona merah, kuning, dan hijau membantu tim lapangan memprioritaskan area patroli secara efisien.</p>
+        </article>
+
+        <!-- Card 2: Lapor Kondisi -->
+        <article class="feat-card" data-real="1" id="card-lapor-kondisi" role="listitem">
+          <div class="feat-card__icon-wrap" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+          </div>
+          <p class="feat-card__tag">Lapor Kondisi</p>
+          <p class="feat-card__subtitle">Respons Lapangan</p>
+          <p class="feat-card__desc">Fitur geotagging untuk relawan dan MPA (Masyarakat Peduli Api) melaporkan titik asap dan api seketika dari lapangan.</p>
+          <div class="feat-card__divider"></div>
+          <p class="feat-card__desc">Laporan terverifikasi langsung masuk ke dashboard pemantauan dan memicu notifikasi ke tim respon cepat.</p>
+        </article>
+
+        <!-- Card 3: Pantau Gambut -->
+        <article class="feat-card" data-real="2" id="card-pantau-gambut" role="listitem">
+          <div class="feat-card__icon-wrap" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="10"/><path d="M5 10c0 3.87 3.13 7 7 7s7-3.13 7-7"/><line x1="2" y1="17" x2="22" y2="17"/><line x1="4" y1="20" x2="20" y2="20"/></svg>
+          </div>
+          <p class="feat-card__tag">Pantau Gambut</p>
+          <p class="feat-card__subtitle">Monitoring TMA</p>
+          <p class="feat-card__desc">Pembacaan telemetri Tinggi Muka Air (TMA) dan kelembapan substrat gambut secara real-time dari sensor IoT di lapangan.</p>
+          <div class="feat-card__divider"></div>
+          <p class="feat-card__desc">Data historis dan tren penurunan muka air ditampilkan dalam grafik interaktif untuk analisis ancaman karhutla.</p>
+        </article>
+
+        <!-- Card 4: Kelola Air -->
+        <article class="feat-card" data-real="3" id="card-kelola-air" role="listitem">
+          <div class="feat-card__icon-wrap" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2 L19.5 15 A7.5 7.5 0 0 1 4.5 15 Z"/></svg>
+          </div>
+          <p class="feat-card__tag">Kelola Air</p>
+          <p class="feat-card__subtitle">Manajemen Kanal</p>
+          <p class="feat-card__desc">Pengendalian sekat kanal untuk menjaga muka air tanah gambut di atas batas kritis -0,4 meter selama musim kemarau.</p>
+          <div class="feat-card__divider"></div>
+          <p class="feat-card__desc">Rekomendasi otomatis pembukaan atau penutupan pintu air berdasarkan data sensor TMA terkini.</p>
+        </article>
+
+        <!-- Card 5: Edukasi -->
+        <article class="feat-card" data-real="4" id="card-edukasi" role="listitem">
+          <div class="feat-card__icon-wrap" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </div>
+          <p class="feat-card__tag">Edukasi</p>
+          <p class="feat-card__subtitle">Pencegahan Karhutla</p>
+          <p class="feat-card__desc">Modul interaktif 3R (Reduce, Restore, Report) untuk membangun kesadaran komunitas, petani, dan relawan pemadam.</p>
+          <div class="feat-card__divider"></div>
+          <p class="feat-card__desc">Konten edukasi tersedia dalam Bahasa Indonesia dan bahasa daerah Kalimantan untuk jangkauan lebih luas.</p>
+        </article>
+
+      </div><!-- /cards-track -->
+    </div><!-- /cards-carousel-wrap -->
+
+    <!-- Pill scrubber indicator -->
+    <div class="carousel-scrubber" id="carouselScrubber" role="tablist" aria-label="Navigasi slide">
+      <div class="scrubber-pill active" id="pill-0" role="tab" aria-selected="true"  aria-label="Slide 1"></div>
+      <div class="scrubber-pill"        id="pill-1" role="tab" aria-selected="false" aria-label="Slide 2"></div>
+      <div class="scrubber-pill"        id="pill-2" role="tab" aria-selected="false" aria-label="Slide 3"></div>
+      <div class="scrubber-pill"        id="pill-3" role="tab" aria-selected="false" aria-label="Slide 4"></div>
+      <div class="scrubber-pill"        id="pill-4" role="tab" aria-selected="false" aria-label="Slide 5"></div>
+    </div>
+
+    <!-- Quote Banner -->
+    <div class="quote-section" aria-label="Kutipan inspirasi">
+      <div class="quote-section__bg" aria-hidden="true"></div>
+      <div class="quote-section__overlay" aria-hidden="true"></div>
+      <div class="quote-section__content">
+        <blockquote>
+          <p class="quote-section__text">&ldquo;Hutan yang lestari dan gambut yang basah adalah nafas bagi kehidupan kita bersama.&rdquo;</p>
+          <footer class="quote-section__source">— DiHutan Conservation Initiative &bull; Kalimantan Barat</footer>
+        </blockquote>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===== TEKNOLOGI SECTION ===== -->
+  <section class="tech-section" id="teknologi" aria-label="Inovasi Digital dan Otomasi">
+    <div class="tech-section__header">
+      <p class="tech-section__eyebrow">INOVASI DIGITAL &amp; OTOMASI</p>
+      <h2 class="tech-section__title">TEKNOLOGI UNTUK MENJAGA HUTAN.</h2>
+      <p class="tech-section__desc">
+        Menggabungkan telemetri lapangan presisi tinggi dengan kecerdasan buatan untuk menjaga keseimbangan hidrologis lahan gambut tropis.
+      </p>
+    </div>
+
+    <div class="tech-grid">
+      <!-- Card 1: IoT Monitoring -->
+      <article class="tech-card" id="tech-card-iot">
+        <div class="tech-card__top">
+          <span class="tech-card__pill">01 / TELEMETRI</span>
+          <span class="tech-card__status-dot tech-card__status-dot--green" aria-hidden="true"></span>
+        </div>
+        <h3 class="tech-card__title">IOT MONITORING</h3>
+        <p class="tech-card__desc">
+          Pantau kondisi lingkungan melalui pembacaan telemetri sensor suhu, kelembapan, konsentrasi gas gambut, dan Muka Air Tanah (TMA) secara real-time langsung ke ponsel Anda.
+        </p>
+        <div class="tech-card__specs">
+          <div class="tech-spec-row">
+            <span class="tech-spec-label">Tinggi Muka Air:</span>
+            <span class="tech-spec-val tech-spec-val--green">-0.24 m (Aman)</span>
+          </div>
+          <div class="tech-spec-row">
+            <span class="tech-spec-label">Kelembapan Tanah:</span>
+            <span class="tech-spec-val">78.4 %</span>
+          </div>
+          <div class="tech-spec-row">
+            <span class="tech-spec-label">Suhu Gambut:</span>
+            <span class="tech-spec-val">28.1 °C</span>
+          </div>
+        </div>
+        <a href="teknologi.html#iot-monitoring" class="tech-card__link" id="btn-learn-iot">PELAJARI LEBIH LANJUT &nbsp;→</a>
+      </article>
+
+      <!-- Card 2: AI Forest Guardian -->
+      <article class="tech-card" id="tech-card-ai">
+        <div class="tech-card__top">
+          <span class="tech-card__pill">02 / KECERDASAN</span>
+          <span class="tech-card__status-dot tech-card__status-dot--blue" aria-hidden="true"></span>
+        </div>
+        <h3 class="tech-card__title">AI FOREST GUARDIAN</h3>
+        <p class="tech-card__desc">
+          Analisis cerdas pola mikroklimat dan indeks kekeringan vegetasi untuk mengenali lonjakan anomali sebelum titik panas (hotspot) tampak oleh satelit luar angkasa.
+        </p>
+        <div class="tech-card__specs">
+          <div class="tech-spec-row">
+            <span class="tech-spec-label">Status Prediksi:</span>
+            <span class="tech-spec-val tech-spec-val--green">Resiko Rendah</span>
+          </div>
+          <div class="tech-spec-row">
+            <span class="tech-spec-label">Probabilitas Karhutla:</span>
+            <span class="tech-spec-val">4.2 % (24 Jam)</span>
+          </div>
+          <div class="tech-spec-row">
+            <span class="tech-spec-label">Indeks Kekeringan:</span>
+            <span class="tech-spec-val tech-spec-val--green">Optimal / Basah</span>
+          </div>
+        </div>
+        <a href="teknologi.html#ai-forest-guardian" class="tech-card__link" id="btn-learn-ai">PELAJARI LEBIH LANJUT &nbsp;→</a>
+      </article>
+
+      <!-- Card 3: Autospray -->
+      <article class="tech-card" id="tech-card-autospray">
+        <div class="tech-card__top">
+          <span class="tech-card__pill">03 / OTOMASI</span>
+          <span class="tech-card__status-dot tech-card__status-dot--yellow" aria-hidden="true"></span>
+        </div>
+        <h3 class="tech-card__title">AUTOSPRAY</h3>
+        <p class="tech-card__desc">
+          Sistem pembasahan otomatis berbasis mikrokontroler hemat daya yang memicu pompa dan sprinkler kanalisasi ketika batas kekeringan kritis gambut terlewati.
+        </p>
+        <div class="tech-card__specs">
+          <div class="tech-spec-row">
+            <span class="tech-spec-label">Pompa Kanal:</span>
+            <span class="tech-spec-val">Siaga (Auto)</span>
+          </div>
+          <div class="tech-spec-row">
+            <span class="tech-spec-label">Ambang Picu TMA:</span>
+            <span class="tech-spec-val tech-spec-val--yellow">&lt; -0.40 meter</span>
+          </div>
+          <div class="tech-spec-row">
+            <span class="tech-spec-label">Siklus Terakhir:</span>
+            <span class="tech-spec-val">Kemarin, 04:30 WIB</span>
+          </div>
+        </div>
+        <a href="teknologi.html#autospray" class="tech-card__link" id="btn-learn-autospray">PELAJARI LEBIH LANJUT &nbsp;→</a>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===== MAP MONITORING SECTION ===== -->
+  <section class="map-section" id="peta" aria-label="Peta Monitoring Wilayah Prioritas">
+    <div class="map-section__header">
+      <p class="map-section__eyebrow">PETA MONITORING WILAYAH PRIORITAS</p>
+      <h2 class="map-section__title">KENALI KAWASAN. PANTAU RISIKO.</h2>
+      <p class="map-section__desc">
+        Pemantauan sebaran tutupan gambut dan hotspot aktif di koridor Sungai Kapuas &amp; Kubu Raya, Kalimantan Barat.
+      </p>
+    </div>
+
+    <div class="map-monitor-card">
+      <!-- Left Map Canvas -->
+      <div class="map-canvas-container" id="mapContainer">
+        <!-- Badge Koordinat -->
+        <div class="map-badge-coord">
+          <p class="map-badge-coord__title">DAS Kapuas &amp; Kubu Raya</p>
+          <p class="map-badge-coord__sub">Koordinat: 0.0389° S, 109.3425° E</p>
+        </div>
+
+        <!-- Compass Rose -->
+        <div class="map-compass-rose" aria-hidden="true">
+          <span>N</span>
+        </div>
+
+        <!-- Real Leaflet Interactive Map -->
+        <div id="kalimantanMap" role="region" aria-label="Peta Interaktif Kalimantan Barat"></div>
+      </div>
+
+      <!-- Right Legend Panel -->
+      <div class="map-legend-panel">
+        <h3 class="map-legend-panel__title">TINGKAT RISIKO KARHUTLA</h3>
+        <p class="map-legend-panel__desc">
+          Data diintegrasikan dari sensor telemetri gambut DiHutan dan data satelit cuaca secara berkala setiap jam.
+        </p>
+
+        <div class="map-legend-list">
+          <!-- Row 1: Rendah -->
+          <div class="map-legend-item">
+            <div class="map-legend-item__status">
+              <span class="map-legend-dot map-legend-dot--green" aria-hidden="true"></span>
+              <strong class="map-legend-item__label">RENDAH (AMAN)</strong>
+            </div>
+            <span class="map-legend-item__tma">TMA &gt; -0.35m</span>
+          </div>
+
+          <!-- Row 2: Sedang -->
+          <div class="map-legend-item">
+            <div class="map-legend-item__status">
+              <span class="map-legend-dot map-legend-dot--yellow" aria-hidden="true"></span>
+              <strong class="map-legend-item__label">SEDANG (WASPADA)</strong>
+            </div>
+            <span class="map-legend-item__tma">TMA -0.40m</span>
+          </div>
+
+          <!-- Row 3: Tinggi -->
+          <div class="map-legend-item">
+            <div class="map-legend-item__status">
+              <span class="map-legend-dot map-legend-dot--red" aria-hidden="true"></span>
+              <strong class="map-legend-item__label">TINGGI (BAHAYA)</strong>
+            </div>
+            <span class="map-legend-item__tma">TMA &lt; -0.45m</span>
+          </div>
+        </div>
+
+        <a href="https://www.google.com/maps/place/Kubu+Raya+Regency,+West+Kalimantan/@-0.2447,109.3378,10z" target="_blank" rel="noopener noreferrer" class="btn-buka-peta" id="btn-open-map-kalimantan">
+          BUKA PETA RISIKO LENGKAP &nbsp;→
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== APP DOWNLOAD SECTION ===== -->
+  <section class="app-section" id="download" aria-label="Aplikasi Mobile DiHutan">
+    <!-- Cream organic flowing curve backdrop on white background -->
+    <div class="app-section__cream-bg" aria-hidden="true">
+      <svg viewBox="0 0 1440 680" preserveAspectRatio="none">
+        <path d="M 0,70 C 200,20 360,15 560,40 C 780,72 1020,120 1440,85 L 1440,640 C 1220,670 1000,660 760,620 C 520,575 280,545 0,610 Z" fill="#f8f7ef" />
+      </svg>
+    </div>
+
+    <div class="app-section__inner">
+      <!-- Left Copy -->
+      <div class="app-copy">
+        <p class="app-copy__eyebrow">MOBILITAS PENJAGA HUTAN</p>
+        <h2 class="app-copy__title">
+          BAWA DIHUTAN.<br />
+          KE MANA SAJA.
+        </h2>
+        <p class="app-copy__desc">
+          Akses edukasi ekosistem hutan, pemantauan sensor telemetri secara langsung, serta pengiriman laporan kondisi terverifikasi dari garda terdepan melalui aplikasi Android DiHutan.
+        </p>
+
+        <a href="https://drive.google.com/file/d/1OvJh5XtWD4I64kgkJLK69zpy28fiMaIP/view?usp=sharing" class="btn-download-app" id="btn-download-apk" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          DOWNLOAD APLIKASI ANDROID
+        </a>
+
+        <div class="app-copy__meta">
+          <span class="app-copy__meta-dot" aria-hidden="true"></span>
+          <span>Versi Stabil v1.4.2 &bull; Kompatibel Android 8.0+ &bull; Ukuran Ringan 28MB</span>
+        </div>
+      </div>
+
+      <!-- Right Phone Visual -->
+      <div class="app-phone-wrap">
+        <!-- Floating Field Badge -->
+        <div class="app-floating-badge" aria-label="Siap Pakai di Lapangan">
+          <div class="app-floating-badge__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div class="app-floating-badge__text">
+            <strong>Siap Pakai di Lapangan</strong>
+            <span>Mendukung mode offline</span>
+          </div>
+        </div>
+
+        <!-- Phone Mockup Frame (Pure white screen with dynamic notch) -->
+        <div class="phone-mockup" role="img" aria-label="Tampilan Aplikasi Android DiHutan">
+          <div class="phone-notch" aria-hidden="true"></div>
+          <div class="phone-mockup__screen">
+            <img src="app-screen.jpg" alt="" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Dark Green Wave matching exactly into Footer -->
+    <div class="app-section__wave-bottom" aria-hidden="true">
+      <svg viewBox="0 0 1440 160" preserveAspectRatio="none">
+        <path d="M 0,90 C 200,35 360,20 540,60 C 740,105 960,165 1200,155 C 1320,150 1390,140 1440,135 L 1440,160 L 0,160 Z" fill="#173f33" />
+      </svg>
+    </div>
+  </section>
+
+  <!-- ===== SITE FOOTER ===== -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-top">
+      <!-- Col 1: About -->
+      <div class="footer-col">
+        <div class="footer-col__logo-wrap">
+          <div class="footer-col__logo-icon" aria-hidden="true">🌿</div>
+          <span class="footer-col__logo-title">dihutan</span>
+        </div>
+        <p class="footer-col__about">
+          Inisiatif pelestarian ekosistem rawa gambut dan pencegahan kebakaran hutan di Kalimantan Barat melalui kolaborasi sains, teknologi IoT, dan keterlibatan komunitas lokal.
+        </p>
+      </div>
+
+      <!-- Col 2: Navigasi -->
+      <div class="footer-col">
+        <h4 class="footer-col__heading">NAVIGASI</h4>
+        <ul class="footer-links">
+          <li><a href="#beranda">Beranda</a></li>
+          <li><a href="#fitur">Tentang DiHutan</a></li>
+          <li><a href="#fitur">Edukasi 3R Gambut</a></li>
+          <li><a href="#peta">Peta Pantauan Wilayah</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 3: Teknologi -->
+      <div class="footer-col">
+        <h4 class="footer-col__heading">TEKNOLOGI</h4>
+        <ul class="footer-links">
+          <li><a href="#teknologi">IoT Telemetri TMA</a></li>
+          <li><a href="#teknologi">AI Forest Guardian</a></li>
+          <li><a href="#teknologi">AutoSpray ESP32</a></li>
+          <li><a href="#teknologi">Geotag Lapangan</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 4: Buletin Rimba -->
+      <div class="footer-col">
+        <h4 class="footer-col__heading">BULETIN RIMBA</h4>
+        <p class="footer-col__buletin-desc">
+          Dapatkan laporan berkala perkembangan restorasi gambut dan peta sebaran hotspot Kalimantan.
+        </p>
+        <form class="footer-newsletter" onsubmit="event.preventDefault(); alert('Terima kasih! Anda telah terdaftar di Buletin Rimba DiHutan.');">
+          <input type="email" placeholder="Alamat email Anda..." required class="footer-newsletter__input" aria-label="Alamat email buletin" />
+          <button type="submit" class="footer-newsletter__btn" aria-label="Kirim pendaftaran buletin">
+            &rarr;
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="footer-bottom">
+      <p class="footer-bottom__copy">
+        Copyright &copy; 2025 DiHutan &mdash; Inisiatif Hutan Lestari Kalimantan. All rights reserved.
+      </p>
+      <div class="footer-bottom__links">
+        <a href="#privacy">Kebijakan Privasi</a>
+        <a href="#terms">Syarat Penggunaan</a>
+        <a href="#contact">Kontak Tim Konservasi</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ---- Active nav highlight on scroll ----
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav__links a');
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + entry.target.id) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, { threshold: 0.6 });
+
+    sections.forEach(s => io.observe(s));
+
+    // ---- Carousel: infinite loop + draggable pill scrubber ----
+    (function () {
+      const track    = document.getElementById('cardsTrack');
+      const scrubber = document.getElementById('carouselScrubber');
+      if (!track || !scrubber) return;
+
+      const TOTAL   = 5;      // real cards
+      const GAP     = 20;
+      let currentIdx = 0;     // 0-4 real index
+
+      // ── 1. Clone cards to create infinite loop (triple the set) ──────────
+      const originals = [...track.querySelectorAll('.feat-card[data-real]')];
+      // Append a copy of all originals (set 2 → forward overflow)
+      originals.forEach(c => {
+        const cl = c.cloneNode(true); cl.setAttribute('aria-hidden','true'); cl.removeAttribute('id'); track.appendChild(cl);
+      });
+      // Prepend a copy of all originals (set 0 → backward overflow)
+      [...originals].reverse().forEach(c => {
+        const cl = c.cloneNode(true); cl.setAttribute('aria-hidden','true'); cl.removeAttribute('id'); track.insertBefore(cl, track.firstChild);
+      });
+      // DOM now: [set0 clones(5)] [set1 REAL(5)] [set2 clones(5)]  = 15 total
+
+      const allCards = () => [...track.querySelectorAll('.feat-card')];
+      const cardW    = () => {
+        const cards = allCards();
+        if (cards.length >= 2) {
+          const diff = cards[1].offsetLeft - cards[0].offsetLeft;
+          if (diff > 0) return diff;
+        }
+        return (cards[0] ? cards[0].offsetWidth : 240) + GAP;
+      };
+
+      // ── 2. Start scroll at set1 (index 5) ────────────────────────────────
+      function initScroll() {
+        const target = originals[0];
+        track.style.scrollBehavior = 'auto';
+        if (target) {
+          track.scrollLeft = target.offsetLeft;
+        } else {
+          track.scrollLeft = TOTAL * cardW();
+        }
+        track.style.scrollBehavior = '';
+      }
+      requestAnimationFrame(() => requestAnimationFrame(initScroll));
+
+      // ── 3. Pills ──────────────────────────────────────────────────────────
+      const pills = [...scrubber.querySelectorAll('.scrubber-pill')];
+
+      function updatePills(idx) {
+        idx = ((idx % TOTAL) + TOTAL) % TOTAL;
+        currentIdx = idx;
+        pills.forEach((p, i) => {
+          p.classList.toggle('active', i === idx);
+          p.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+        });
+        // Highlight active card (both originals and clones)
+        allCards().forEach(c => {
+          const r = parseInt(c.getAttribute('data-real'), 10);
+          c.classList.toggle('active', r === idx);
+        });
+      }
+
+      // ── 4. Scroll event → sync pills + loop jump ─────────────────────────
+      let scrollTimer;
+      function onScrollEnd() {
+        const cw  = cardW();
+        if (cw <= 0) return;
+        const pos = track.scrollLeft;
+        const snapIdx = Math.round(pos / cw);
+
+        // Seamlessly jump if in clone zone
+        if (snapIdx < TOTAL) {
+          track.style.scrollBehavior = 'auto';
+          track.scrollLeft = pos + TOTAL * cw;
+          track.style.scrollBehavior = '';
+        } else if (snapIdx >= TOTAL * 2) {
+          track.style.scrollBehavior = 'auto';
+          track.scrollLeft = pos - TOTAL * cw;
+          track.style.scrollBehavior = '';
+        }
+        const realIdx = ((Math.round(track.scrollLeft / cw) - TOTAL) % TOTAL + TOTAL) % TOTAL;
+        updatePills(realIdx);
+      }
+
+      track.addEventListener('scroll', () => {
+        // Real-time pill update while scrolling
+        const cw = cardW();
+        if (cw > 0) {
+          const snapIdx = Math.round(track.scrollLeft / cw);
+          const realIdx = ((snapIdx - TOTAL) % TOTAL + TOTAL) % TOTAL;
+          updatePills(realIdx);
+        }
+        // Debounced loop correction
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(onScrollEnd, 120);
+      }, { passive: true });
+
+      if ('onscrollend' in window) track.addEventListener('scrollend', onScrollEnd, { passive: true });
+
+      // ── 5. Track drag-to-scroll ───────────────────────────────────────────
+      let isDragging = false, dragStartX = 0, dragScrollLeft = 0;
+
+      track.addEventListener('mousedown', e => {
+        isDragging = true;
+        dragStartX = e.pageX;
+        dragScrollLeft = track.scrollLeft;
+        track.classList.add('is-dragging');
+        track.style.scrollBehavior = 'auto';
+      });
+      document.addEventListener('mouseup', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        track.classList.remove('is-dragging');
+        track.style.scrollBehavior = '';
+        onScrollEnd();
+      });
+      track.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        e.preventDefault();
+        track.scrollLeft = dragScrollLeft - (e.pageX - dragStartX) * 1.2;
+      });
+
+      // Touch
+      let tStartX = 0, tScrollLeft = 0;
+      track.addEventListener('touchstart', e => {
+        tStartX = e.touches[0].pageX;
+        tScrollLeft = track.scrollLeft;
+        track.style.scrollBehavior = 'auto';
+      }, { passive: true });
+      track.addEventListener('touchmove', e => {
+        track.scrollLeft = tScrollLeft - (e.touches[0].pageX - tStartX);
+      }, { passive: true });
+      track.addEventListener('touchend', () => {
+        track.style.scrollBehavior = '';
+        onScrollEnd();
+      }, { passive: true });
+
+      // ── 6. Pill click ─────────────────────────────────────────────────────
+      pills.forEach((pill, i) => {
+        pill.addEventListener('click', (e) => {
+          if (e.defaultPrevented) return;
+          const target = originals[i];
+          if (target) {
+            track.scrollTo({ left: target.offsetLeft, behavior: 'smooth' });
+          } else {
+            const cw = cardW();
+            track.scrollTo({ left: (TOTAL + i) * cw, behavior: 'smooth' });
+          }
+          updatePills(i);
+        });
+      });
+
+      // ── 7. Pill scrubber drag ─────────────────────────────────────────────
+      let pillDragging = false, pillDragStartX = 0, pillDragOriginIdx = 0;
+
+      scrubber.addEventListener('mousedown', e => {
+        pillDragging = true;
+        pillDragStartX = e.clientX;
+        pillDragOriginIdx = currentIdx;
+        e.preventDefault();
+      });
+      document.addEventListener('mousemove', e => {
+        if (!pillDragging) return;
+        const dx    = e.clientX - pillDragStartX;
+        const step  = 24; // px per pill step (pill width + gap)
+        const steps = Math.round(dx / step);
+        const newIdx = Math.max(0, Math.min(TOTAL - 1, pillDragOriginIdx + steps));
+        if (newIdx !== currentIdx) {
+          const target = originals[newIdx];
+          track.style.scrollBehavior = 'auto';
+          if (target) {
+            track.scrollLeft = target.offsetLeft;
+          } else {
+            track.scrollLeft = (TOTAL + newIdx) * cardW();
+          }
+          track.style.scrollBehavior = '';
+          updatePills(newIdx);
+        }
+      });
+      document.addEventListener('mouseup', e => {
+        if (pillDragging) { pillDragging = false; e.preventDefault(); }
+      });
+
+      // Touch on scrubber
+      scrubber.addEventListener('touchstart', e => {
+        pillDragging = true;
+        pillDragStartX = e.touches[0].clientX;
+        pillDragOriginIdx = currentIdx;
+      }, { passive: true });
+      scrubber.addEventListener('touchmove', e => {
+        if (!pillDragging) return;
+        const dx    = e.touches[0].clientX - pillDragStartX;
+        const step  = 24;
+        const steps = Math.round(dx / step);
+        const newIdx = Math.max(0, Math.min(TOTAL - 1, pillDragOriginIdx + steps));
+        if (newIdx !== currentIdx) {
+          const target = originals[newIdx];
+          track.style.scrollBehavior = 'auto';
+          if (target) {
+            track.scrollLeft = target.offsetLeft;
+          } else {
+            track.scrollLeft = (TOTAL + newIdx) * cardW();
+          }
+          track.style.scrollBehavior = '';
+          updatePills(newIdx);
+        }
+      }, { passive: true });
+      scrubber.addEventListener('touchend', () => { pillDragging = false; }, { passive: true });
+
+      // Keep position aligned on window resize
+      window.addEventListener('resize', () => {
+        const target = originals[currentIdx];
+        if (target) {
+          track.style.scrollBehavior = 'auto';
+          track.scrollLeft = target.offsetLeft;
+          track.style.scrollBehavior = '';
+        }
+      });
+
+      // ── 8. Init ───────────────────────────────────────────────────────────
+      updatePills(0);
+    })();
+
+    // ---- Real Interactive Kalimantan Map (DAS Kapuas & Kubu Raya) ----
+    (function initKalimantanMap() {
+      const mapEl = document.getElementById('kalimantanMap');
+      if (!mapEl) return;
+
+      function setupMap() {
+        if (typeof L === 'undefined') {
+          setTimeout(setupMap, 150);
+          return;
+        }
+
+        // Center on DAS Kapuas & Kubu Raya, Kalimantan Barat: lat -0.0389, lng 109.3425
+        const map = L.map('kalimantanMap', {
+          center: [-0.0389, 109.3425],
+          zoom: 10,
+          scrollWheelZoom: true,
+          zoomControl: true
+        });
+
+        // OpenStreetMap tiles do not require a separate API key.
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>',
+          maxZoom: 19,
+          subdomains: ['a', 'b', 'c']
+        }).addTo(map);
+
+        // Custom marker icon helper
+        function createPinIcon(colorClass) {
+          return L.divIcon({
+            className: 'custom-leaflet-pin',
+            html: `<div class="map-pin ${colorClass}"><div class="map-pin__pulse"></div></div>`,
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+            popupAnchor: [0, -12]
+          });
+        }
+
+        // Real hotspot and monitoring sensor telemetry points in West Kalimantan
+        const stations = [
+          {
+            name: 'Zona Gambut Rasau Jaya (Hotspot Aktif)',
+            coords: [-0.178, 109.385],
+            status: 'BAHAYA',
+            statusColor: '#ef4444',
+            color: 'map-pin--red',
+            tma: '-0.48 m',
+            suhu: '33.2 °C',
+            note: 'TMA di bawah ambang batas kritis (-0.45m). Risiko karhutla tinggi, butuh pembasahan kanal segera.'
+          },
+          {
+            name: 'Koridor Sungai Kapuas Hilir / Ambawang',
+            coords: [-0.052, 109.432],
+            status: 'WASPADA',
+            statusColor: '#f59e0b',
+            color: 'map-pin--yellow',
+            tma: '-0.41 m',
+            suhu: '30.4 °C',
+            note: 'Tren penurunan muka air gambut mendekati level kritis. Siaga pompa kanalisasi.'
+          },
+          {
+            name: 'Pos Pantau Delta Kapuas & Teluk Pakedai',
+            coords: [-0.275, 109.284],
+            status: 'AMAN',
+            statusColor: '#22c55e',
+            color: 'map-pin--green',
+            tma: '-0.24 m',
+            suhu: '28.5 °C',
+            note: 'Kelembapan tanah 78.4%, muka air gambut stabil dan terjaga aman.'
+          },
+          {
+            name: 'Stasiun Telemetri Siantan Hilir',
+            coords: [0.012, 109.345],
+            status: 'AMAN',
+            statusColor: '#22c55e',
+            color: 'map-pin--green',
+            tma: '-0.29 m',
+            suhu: '28.1 °C',
+            note: 'Pembacaan gas dan mikroklimat dalam batas normal.'
+          },
+          {
+            name: 'Kubu Kawasan Konservasi Gambut',
+            coords: [-0.345, 109.438],
+            status: 'AMAN',
+            statusColor: '#22c55e',
+            color: 'map-pin--green',
+            tma: '-0.21 m',
+            suhu: '27.8 °C',
+            note: 'Vegetasi basah alami, ekosistem hidrologis terlindungi.'
+          }
+        ];
+
+        stations.forEach(st => {
+          const marker = L.marker(st.coords, { icon: createPinIcon(st.color) }).addTo(map);
+          marker.bindPopup(`
+            <div style="font-family: 'Inter', sans-serif; font-size: 12px; line-height: 1.5; padding: 4px 2px; min-width: 200px;">
+              <strong style="color: #1a3328; font-size: 13px; display: block; margin-bottom: 5px;">${st.name}</strong>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 11px; color: #6b7280;">Status:</span>
+                <span style="font-weight: 700; font-size: 11px; color: ${st.statusColor}; background: ${st.statusColor}15; padding: 2px 8px; border-radius: 100px;">${st.status}</span>
+              </div>
+              <div style="background: #f7f5ef; padding: 7px 10px; border-radius: 8px; font-family: monospace; font-size: 11px; margin-bottom: 8px; display: flex; justify-content: space-between;">
+                <span>TMA: <b style="color: #1a3328;">${st.tma}</b></span>
+                <span>Suhu: <b style="color: #1a3328;">${st.suhu}</b></span>
+              </div>
+              <p style="margin: 0; color: #5a6e62; font-size: 11px; line-height: 1.45;">${st.note}</p>
+            </div>
+          `);
+        });
+
+        // Trigger map resize recalculation when loaded or scrolled into view
+        setTimeout(() => map.invalidateSize(), 400);
+        window.addEventListener('resize', () => map.invalidateSize());
+
+        const mapObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              map.invalidateSize();
+            }
+          });
+        }, { threshold: 0.2 });
+        mapObserver.observe(mapEl);
+      }
+
+      setupMap();
+    })();
+  </script>
+</body>
+</html>
