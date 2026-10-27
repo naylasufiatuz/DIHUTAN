@@ -9,6 +9,7 @@
   <!-- Google Fonts: Inter for body, Barlow Condensed for hero heading -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <!-- Leaflet Map library for real interactive Kalimantan map -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -333,6 +334,169 @@
       margin-left: 2px;
     }
 
+    .video-dialog {
+      width: min(680px, calc(100% - 32px));
+      max-height: min(90vh, 760px);
+      margin: auto;
+      padding: 0;
+      color: #1a3328;
+      background: #f7f7ef;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 22px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.38);
+    }
+
+    .video-dialog::backdrop {
+      background: rgba(4, 14, 8, 0.78);
+      backdrop-filter: blur(6px);
+    }
+
+    .video-dialog__content {
+      padding: 28px;
+    }
+
+    .video-dialog__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .video-dialog__eyebrow {
+      margin-bottom: 7px;
+      color: #5a7a62;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .video-dialog__title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 34px;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .video-dialog__close,
+    .video-dialog__back {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .video-dialog__close {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      place-items: center;
+      color: #1a3328;
+      background: #e8eee8;
+      border: 0;
+      border-radius: 50%;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .video-dialog__intro {
+      margin-bottom: 16px;
+      color: #5a6e62;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .video-dialog__options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .video-dialog__option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-height: 96px;
+      padding: 18px;
+      color: #1a3328;
+      text-align: left;
+      background: #fff;
+      border: 1px solid #dfe7df;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+
+    .video-dialog__option:hover {
+      transform: translateY(-2px);
+      border-color: #3a7d52;
+      box-shadow: 0 8px 22px rgba(26,51,40,0.1);
+    }
+
+    .video-dialog__option-play {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      flex: 0 0 42px;
+      place-items: center;
+      color: #fff;
+      background: #2d5a3d;
+      border-radius: 50%;
+      font-size: 15px;
+    }
+
+    .video-dialog__option strong,
+    .video-dialog__option small {
+      display: block;
+    }
+
+    .video-dialog__option strong {
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .video-dialog__option small {
+      color: #5a6e62;
+      font-size: 11px;
+    }
+
+    .video-dialog__player[hidden] {
+      display: none;
+    }
+
+    .video-dialog__back {
+      margin-bottom: 14px;
+      padding: 0;
+      color: #2d5a3d;
+      background: none;
+      border: 0;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .video-dialog__player-title {
+      margin-bottom: 12px;
+      font-size: 17px;
+    }
+
+    .video-dialog__player video {
+      display: block;
+      width: 100%;
+      max-height: 65vh;
+      background: #0c1a10;
+      border-radius: 12px;
+    }
+
+    @media (max-width: 520px) {
+      .video-dialog__content {
+        padding: 22px;
+      }
+
+      .video-dialog__options {
+        grid-template-columns: 1fr;
+      }
+    }
+
 
 
     /* ===== CAPABILITIES SECTION ===== */
@@ -546,8 +710,11 @@
       border-radius: 3px;
       background: #c8c3b8;
       width: 18px;
+      padding: 0;
+      border: 0;
       transition: width 0.3s cubic-bezier(.4,0,.2,1), background 0.3s ease;
       flex-shrink: 0;
+      cursor: pointer;
     }
 
     .scrubber-pill.active {
@@ -651,6 +818,13 @@
       line-height: 1.65;
       color: rgba(255, 255, 255, 0.70);
       max-width: 540px;
+    }
+
+    .tech-section__data-note {
+      display: block;
+      margin-top: 8px;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 11px;
     }
 
     .tech-grid {
@@ -1584,64 +1758,12 @@
       transform: translateX(3px);
     }
 
-    .footer-col__buletin-desc {
+    .footer-col__explore-desc {
       font-family: 'Inter', sans-serif;
       font-size: 12px;
       line-height: 1.65;
       color: rgba(255, 255, 255, 0.70);
       margin-bottom: 18px;
-    }
-
-    .footer-newsletter {
-      position: relative;
-      max-width: 340px;
-    }
-
-    .footer-newsletter__input {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 100px;
-      padding: 11px 48px 11px 18px;
-      font-family: 'Inter', sans-serif;
-      font-size: 11.5px;
-      color: #ffffff;
-      outline: none;
-      transition: border-color 0.2s, background 0.2s;
-    }
-
-    .footer-newsletter__input:focus {
-      border-color: #4ade80;
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    .footer-newsletter__input::placeholder {
-      color: rgba(255, 255, 255, 0.45);
-    }
-
-    .footer-newsletter__btn {
-      position: absolute;
-      right: 5px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: #84d8a7;
-      color: #173f33;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.2s;
-    }
-
-    .footer-newsletter__btn:hover {
-      background: #a3e9c0;
-      transform: translateY(-50%) scale(1.05);
     }
 
     /* Bottom Bar */
@@ -1862,7 +1984,6 @@
           <li><a href="#fitur"     id="nav-fitur">Fitur</a></li>
           <li><a href="#teknologi" id="nav-teknologi">Teknologi</a></li>
           <li><a href="#peta"      id="nav-peta">Peta Risiko</a></li>
-          <li><a href="#edukasi"   id="nav-edukasi">Edukasi</a></li>
         </ul>
 
         <a href="https://drive.google.com/file/d/1OvJh5XtWD4I64kgkJLK69zpy28fiMaIP/view?usp=sharing" class="nav__cta" id="btn-download-app" target="_blank" rel="noopener noreferrer">Download App &nbsp;→</a>
@@ -1887,14 +2008,14 @@
             <span class="arrow">→</span>
           </a>
 
-          <a href="#video" class="btn-video" id="btn-watch-video">
+          <button type="button" class="btn-video" id="btn-watch-video" aria-haspopup="dialog" aria-controls="video-dialog">
             <span class="play-icon" aria-hidden="true">
               <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <path d="M4 2.5l10 5.5-10 5.5z"/>
               </svg>
             </span>
             Watch Video
-          </a>
+          </button>
         </div>
       </div>
 
@@ -1902,6 +2023,38 @@
 
     </div>
   </section>
+
+  <dialog class="video-dialog" id="video-dialog" aria-labelledby="video-dialog-title">
+    <div class="video-dialog__content">
+      <div class="video-dialog__header">
+        <div>
+          <p class="video-dialog__eyebrow">Video DiHutan</p>
+          <h2 class="video-dialog__title" id="video-dialog-title">Pilih Video</h2>
+        </div>
+        <button type="button" class="video-dialog__close" id="video-dialog-close" aria-label="Tutup pilihan video">&times;</button>
+      </div>
+
+      <div id="video-dialog-options">
+        <p class="video-dialog__intro">Pilih video yang ingin kamu tonton.</p>
+        <div class="video-dialog__options">
+          <button type="button" class="video-dialog__option" data-video-src="videos/Demonstration.mp4" data-video-title="Demonstration">
+            <span class="video-dialog__option-play" aria-hidden="true">▶</span>
+            <span><strong>Demonstration</strong><small>Video demonstrasi DiHutan</small></span>
+          </button>
+          <button type="button" class="video-dialog__option" data-video-src="videos/Overview.mp4" data-video-title="Overview">
+            <span class="video-dialog__option-play" aria-hidden="true">▶</span>
+            <span><strong>Overview</strong><small>Video overview DiHutan</small></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="video-dialog__player" id="video-dialog-player" hidden>
+        <button type="button" class="video-dialog__back" id="video-dialog-back">← Kembali ke pilihan video</button>
+        <h3 class="video-dialog__player-title" id="video-dialog-player-title"></h3>
+        <video id="video-dialog-video" controls playsinline preload="none"></video>
+      </div>
+    </div>
+  </dialog>
 
   <!-- ===== CAPABILITIES SECTION ===== -->
   <section class="capabilities" id="fitur" aria-label="Fitur dan Kemampuan">
@@ -1965,28 +2118,15 @@
           <p class="feat-card__desc">Rekomendasi otomatis pembukaan atau penutupan pintu air berdasarkan data sensor TMA terkini.</p>
         </article>
 
-        <!-- Card 5: Edukasi -->
-        <article class="feat-card" data-real="4" id="card-edukasi" role="listitem">
-          <div class="feat-card__icon-wrap" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-          </div>
-          <p class="feat-card__tag">Edukasi</p>
-          <p class="feat-card__subtitle">Pencegahan Karhutla</p>
-          <p class="feat-card__desc">Modul interaktif 3R (Reduce, Restore, Report) untuk membangun kesadaran komunitas, petani, dan relawan pemadam.</p>
-          <div class="feat-card__divider"></div>
-          <p class="feat-card__desc">Konten edukasi tersedia dalam Bahasa Indonesia dan bahasa daerah Kalimantan untuk jangkauan lebih luas.</p>
-        </article>
-
       </div><!-- /cards-track -->
     </div><!-- /cards-carousel-wrap -->
 
     <!-- Pill scrubber indicator -->
     <div class="carousel-scrubber" id="carouselScrubber" role="tablist" aria-label="Navigasi slide">
-      <div class="scrubber-pill active" id="pill-0" role="tab" aria-selected="true"  aria-label="Slide 1"></div>
-      <div class="scrubber-pill"        id="pill-1" role="tab" aria-selected="false" aria-label="Slide 2"></div>
-      <div class="scrubber-pill"        id="pill-2" role="tab" aria-selected="false" aria-label="Slide 3"></div>
-      <div class="scrubber-pill"        id="pill-3" role="tab" aria-selected="false" aria-label="Slide 4"></div>
-      <div class="scrubber-pill"        id="pill-4" role="tab" aria-selected="false" aria-label="Slide 5"></div>
+      <button type="button" class="scrubber-pill active" id="pill-0" role="tab" aria-selected="true" aria-label="Slide 1"></button>
+      <button type="button" class="scrubber-pill" id="pill-1" role="tab" aria-selected="false" aria-label="Slide 2"></button>
+      <button type="button" class="scrubber-pill" id="pill-2" role="tab" aria-selected="false" aria-label="Slide 3"></button>
+      <button type="button" class="scrubber-pill" id="pill-3" role="tab" aria-selected="false" aria-label="Slide 4"></button>
     </div>
 
     <!-- Quote Banner -->
@@ -2010,6 +2150,7 @@
       <h2 class="tech-section__title">TEKNOLOGI UNTUK MENJAGA HUTAN.</h2>
       <p class="tech-section__desc">
         Menggabungkan telemetri lapangan presisi tinggi dengan kecerdasan buatan untuk menjaga keseimbangan hidrologis lahan gambut tropis.
+        <span class="tech-section__data-note">Angka pada kartu teknologi adalah data demonstrasi, bukan pembacaan sensor langsung.</span>
       </p>
     </div>
 
@@ -2103,7 +2244,7 @@
       <p class="map-section__eyebrow">PETA MONITORING WILAYAH PRIORITAS</p>
       <h2 class="map-section__title">KENALI KAWASAN. PANTAU RISIKO.</h2>
       <p class="map-section__desc">
-        Pemantauan sebaran tutupan gambut dan hotspot aktif di koridor Sungai Kapuas &amp; Kubu Raya, Kalimantan Barat.
+        Peta interaktif koridor Sungai Kapuas dan Kubu Raya, Kalimantan Barat. Status dan nilai sensor yang ditampilkan adalah data demonstrasi, bukan pemantauan langsung.
       </p>
     </div>
 
@@ -2129,7 +2270,7 @@
       <div class="map-legend-panel">
         <h3 class="map-legend-panel__title">TINGKAT RISIKO KARHUTLA</h3>
         <p class="map-legend-panel__desc">
-          Data diintegrasikan dari sensor telemetri gambut DiHutan dan data satelit cuaca secara berkala setiap jam.
+          Contoh kategori risiko berdasarkan tinggi muka air gambut. Hubungkan sumber sensor untuk menampilkan kondisi lapangan terkini.
         </p>
 
         <div class="map-legend-list">
@@ -2162,7 +2303,7 @@
         </div>
 
         <a href="https://www.google.com/maps/place/Kubu+Raya+Regency,+West+Kalimantan/@-0.2447,109.3378,10z" target="_blank" rel="noopener noreferrer" class="btn-buka-peta" id="btn-open-map-kalimantan">
-          BUKA PETA RISIKO LENGKAP &nbsp;→
+          LIHAT LOKASI KUBU RAYA DI GOOGLE MAPS &nbsp;→
         </a>
       </div>
     </div>
@@ -2257,7 +2398,6 @@
         <ul class="footer-links">
           <li><a href="#beranda">Beranda</a></li>
           <li><a href="#fitur">Tentang DiHutan</a></li>
-          <li><a href="#fitur">Edukasi 3R Gambut</a></li>
           <li><a href="#peta">Peta Pantauan Wilayah</a></li>
         </ul>
       </div>
@@ -2273,35 +2413,79 @@
         </ul>
       </div>
 
-      <!-- Col 4: Buletin Rimba -->
+      <!-- Col 4: Jelajahi DiHutan -->
       <div class="footer-col">
-        <h4 class="footer-col__heading">BULETIN RIMBA</h4>
-        <p class="footer-col__buletin-desc">
-          Dapatkan laporan berkala perkembangan restorasi gambut dan peta sebaran hotspot Kalimantan.
+        <h4 class="footer-col__heading">JELAJAHI DIHUTAN</h4>
+        <p class="footer-col__explore-desc">
+          Lihat pemantauan risiko kebakaran dan kenali teknologi yang membantu menjaga hutan.
         </p>
-        <form class="footer-newsletter" onsubmit="event.preventDefault(); alert('Terima kasih! Anda telah terdaftar di Buletin Rimba DiHutan.');">
-          <input type="email" placeholder="Alamat email Anda..." required class="footer-newsletter__input" aria-label="Alamat email buletin" />
-          <button type="submit" class="footer-newsletter__btn" aria-label="Kirim pendaftaran buletin">
-            &rarr;
-          </button>
-        </form>
+        <ul class="footer-links">
+          <li><a href="#peta">Lihat Peta Risiko &rarr;</a></li>
+          <li><a href="teknologi.html">Jelajahi Teknologi &rarr;</a></li>
+        </ul>
       </div>
     </div>
 
     <!-- Bottom Bar -->
     <div class="footer-bottom">
       <p class="footer-bottom__copy">
-        Copyright &copy; 2025 DiHutan &mdash; Inisiatif Hutan Lestari Kalimantan. All rights reserved.
+        Copyright &copy; <span id="current-year"></span> DiHutan &mdash; Inisiatif Hutan Lestari Kalimantan. All rights reserved.
       </p>
       <div class="footer-bottom__links">
-        <a href="#privacy">Kebijakan Privasi</a>
-        <a href="#terms">Syarat Penggunaan</a>
-        <a href="#contact">Kontak Tim Konservasi</a>
+        <a href="#beranda">Kembali ke atas</a>
+        <a href="teknologi.html">Teknologi DiHutan</a>
       </div>
     </div>
   </footer>
 
   <script>
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // ---- Video selection dialog ----
+    (function () {
+      const openButton = document.getElementById('btn-watch-video');
+      const dialog = document.getElementById('video-dialog');
+      const closeButton = document.getElementById('video-dialog-close');
+      const backButton = document.getElementById('video-dialog-back');
+      const options = document.getElementById('video-dialog-options');
+      const player = document.getElementById('video-dialog-player');
+      const playerTitle = document.getElementById('video-dialog-player-title');
+      const video = document.getElementById('video-dialog-video');
+
+      if (!openButton || !dialog || !closeButton || !backButton || !options || !player || !playerTitle || !video) return;
+
+      function stopVideo() {
+        video.pause();
+        video.removeAttribute('src');
+        video.load();
+      }
+
+      function showOptions() {
+        stopVideo();
+        player.hidden = true;
+        options.hidden = false;
+        playerTitle.textContent = '';
+      }
+
+      openButton.addEventListener('click', () => dialog.showModal());
+      closeButton.addEventListener('click', () => dialog.close());
+      backButton.addEventListener('click', showOptions);
+      dialog.addEventListener('click', event => {
+        if (event.target === dialog) dialog.close();
+      });
+      dialog.addEventListener('close', showOptions);
+
+      dialog.querySelectorAll('[data-video-src]').forEach(button => {
+        button.addEventListener('click', () => {
+          playerTitle.textContent = button.dataset.videoTitle;
+          video.src = button.dataset.videoSrc;
+          options.hidden = true;
+          player.hidden = false;
+          video.load();
+        });
+      });
+    })();
+
     // ---- Active nav highlight on scroll ----
     const sections = document.querySelectorAll('section[id]');
     const navLinks = document.querySelectorAll('.nav__links a');
@@ -2327,12 +2511,13 @@
       const scrubber = document.getElementById('carouselScrubber');
       if (!track || !scrubber) return;
 
-      const TOTAL   = 5;      // real cards
       const GAP     = 20;
-      let currentIdx = 0;     // 0-4 real index
+      let currentIdx = 0;
 
       // ── 1. Clone cards to create infinite loop (triple the set) ──────────
       const originals = [...track.querySelectorAll('.feat-card[data-real]')];
+      const TOTAL = originals.length;
+      if (!TOTAL) return;
       // Append a copy of all originals (set 2 → forward overflow)
       originals.forEach(c => {
         const cl = c.cloneNode(true); cl.setAttribute('aria-hidden','true'); cl.removeAttribute('id'); track.appendChild(cl);
@@ -2341,7 +2526,7 @@
       [...originals].reverse().forEach(c => {
         const cl = c.cloneNode(true); cl.setAttribute('aria-hidden','true'); cl.removeAttribute('id'); track.insertBefore(cl, track.firstChild);
       });
-      // DOM now: [set0 clones(5)] [set1 REAL(5)] [set2 clones(5)]  = 15 total
+      // DOM now contains a copy before and after the original cards.
 
       const allCards = () => [...track.querySelectorAll('.feat-card')];
       const cardW    = () => {
@@ -2353,7 +2538,7 @@
         return (cards[0] ? cards[0].offsetWidth : 240) + GAP;
       };
 
-      // ── 2. Start scroll at set1 (index 5) ────────────────────────────────
+      // ── 2. Start scroll at the original cards ────────────────────────────
       function initScroll() {
         const target = originals[0];
         track.style.scrollBehavior = 'auto';
